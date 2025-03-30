@@ -1,0 +1,1 @@
+Ollama scripts. Running open source LLMs locally.

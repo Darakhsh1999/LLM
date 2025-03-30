@@ -1,0 +1,1 @@
+available models: https://www.ollama.com/library
