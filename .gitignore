@@ -3,3 +3,4 @@ __pycache__
 GPT
 LLMs from scratch/ch5/gpt2
 ollama/chroma_db
+chroma/

@@ -9,6 +9,7 @@ from langchain_community.vectorstores import Chroma
 from load_in_data import load_data, chunk_data
 
 PROMPT_TEMPLATE = """
+You are an assistan that will perform Retrieval Augmented Generation (RAG).
 Answer the question based only on the following context:
 
 {context}
