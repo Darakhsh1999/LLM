@@ -147,36 +147,38 @@ class GPT(nn.Module):
     def encode(self, input_string):
         return self.tokenizer.encode(input_string)
 
-    def generate(self, token_input, max_new_tokens=10, decode=False, greedy=False, temperature=1.0, device=None):
+    @torch.no_grad
+    def generate(self, _input, max_new_tokens=10, decode=False, greedy=False, temperature=1.0, device=None):
         
         device = "cpu" if device is None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        if isinstance(token_input, str):
-            token_input = torch.Tensor(self.encode(token_input)).type(torch.LongTensor)[None,:] # [B,T]
+        if isinstance(_input, str): # Tokenize if input is string
+            token_input = torch.Tensor(self.encode(_input)).type(torch.LongTensor)[None,:] # [B,T]
+        else:
+            token_input = _input
 
         self.eval()
-        with torch.no_grad():
-            for _ in range(max_new_tokens):
+        for _ in range(max_new_tokens):
 
-                truncated_tokens = token_input[:, -self.config["context_length"]:] # Incase we exceed context length
-                truncated_tokens = truncated_tokens.to(device)
+            truncated_tokens = token_input[:, -self.config["context_length"]:] # Incase we exceed context length
+            truncated_tokens = truncated_tokens.to(device)
 
-                logits = self.forward(truncated_tokens) # [B,T] -> [B,T,vocab_size]
-                last_token_logits = logits[:, -1, :] # logits for last  [B,vocab_size]
+            logits = self.forward(truncated_tokens) # [B,T] -> [B,T,vocab_size]
+            last_token_logits = logits[:, -1, :] # logits for last  [B,vocab_size]
 
-                if greedy:
-                    idx_next = torch.argmax(last_token_logits, dim=-1, keepdim=True).cpu() # [B,1]
-                else: # TopK and temperature
-                    last_token_logits = last_token_logits/ temperature
-                    topk_logits, _ = torch.topk(last_token_logits, k=50)
-                    last_token_logits = torch.where(
-                        condition= last_token_logits < topk_logits[:,-1],
-                        input=torch.tensor(float("-inf")),
-                        other=last_token_logits
-                    )
-                    topk_probas = F.softmax(last_token_logits, dim=-1) # [B,vocab_size]
-                    idx_next = torch.multinomial(topk_probas, num_samples=1).cpu()
-                token_input = torch.cat((token_input, idx_next), dim=1)
+            if greedy:
+                idx_next = torch.argmax(last_token_logits, dim=-1, keepdim=True).cpu() # [B,1]
+            else: # TopK and temperature
+                last_token_logits = last_token_logits/ temperature
+                topk_logits, _ = torch.topk(last_token_logits, k=50)
+                last_token_logits = torch.where(
+                    condition= last_token_logits < topk_logits[:,-1],
+                    input=torch.tensor(float("-inf")),
+                    other=last_token_logits
+                )
+                topk_probas = F.softmax(last_token_logits, dim=-1) # [B,vocab_size]
+                idx_next = torch.multinomial(topk_probas, num_samples=1).cpu() # [B,1]
+            token_input = torch.cat((token_input, idx_next), dim=1)
             
         if decode:
             return self.tokenizer.decode(token_input.squeeze().tolist())

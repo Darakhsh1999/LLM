@@ -190,6 +190,17 @@ def load_weights_into_gpt(gpt, params):
     gpt.output_head.weight = assign(gpt.output_head.weight, params["wte"])
 
 
+def load_pretrained_gpt2_model(gpt_config):
+    """ Returns OpenAI's pretrained GP2 weights """
+
+    model = GPT(gpt_config)
+    _, params = download_and_load_gpt2(models_dir="gpt2")
+    load_weights_into_gpt(model, params)
+    model.eval()
+
+    return model
+
+
 if __name__ == "__main__":
 
     # GPT config for GPT2-small
@@ -215,5 +226,5 @@ if __name__ == "__main__":
 
     model.to(device)
     model.eval()
-    model_output = model.generate("A big advantage of having a car is", max_new_tokens=10, decode=True, device=device)
+    model_output = model.generate("A big advantage of having a car is", max_new_tokens=20, decode=True, device=device)
     print(model_output)

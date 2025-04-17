@@ -22,16 +22,17 @@ def tokens2text(tokens, tokenizer):
     return decoded
 
 
+@torch.no_grad
 def test(model, device, loss_fn, data_loader):
 
     model.eval()
     val_loss = 0.0
-    with torch.no_grad():
-        for (x,y) in data_loader:
-            x, y = x.to(device), y.to(device) # move to appropriate device
-            logits = model(x) # forward pass
-            loss = loss_fn(logits.flatten(0,1),y.flatten()) # calculate loss
-            val_loss += loss.item()
+    for (x,y) in data_loader:
+        x, y = x.to(device), y.to(device) # move to appropriate device
+        logits = model(x) # forward pass
+        assert not logits.requires_grad, "Gradients tracked in test function"
+        loss = loss_fn(logits.flatten(0,1),y.flatten()) # calculate loss
+        val_loss += loss.item()
     return val_loss/len(data_loader)
 
 
@@ -49,13 +50,12 @@ def pretrain(train_config, model, optimizer, loss_fn, train_loader, val_loader, 
     if verbose:
         print(f"Started training with device: {device} | {len(train_loader)} train batches and {len(val_loader)} val batches.")
 
-    
-    for epoch_idx in tqdm(range(train_config["n_epochs"])):
+    for epoch_idx in range(train_config["n_epochs"]):
 
         # Train loop
         train_loss = 0.0
         model.train()
-        for batch_idx, (x,y) in tqdm(enumerate(train_loader)):
+        for batch_idx, (x,y) in enumerate(tqdm(train_loader, desc="Batch", leave=True)):
 
             n_tokens += x.numel()
 
@@ -85,9 +85,9 @@ def pretrain(train_config, model, optimizer, loss_fn, train_loader, val_loader, 
 
         # Generate
         model.eval()
-        print(model.generate("Today I will", max_new_tokens=10, decode=True, device=device))
+        print(f"Epoch: {epoch_idx}", model.generate("Today I will", max_new_tokens=15, decode=True, device=device))
     
-    return 
+    return logs 
 
 
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     # Train config
     train_config = {
-        "n_epochs": 10,
+        "n_epochs": 20,
 
     }
 
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     loss_fn = nn.CrossEntropyLoss()
 
     # Load data 
-    text_path = os.path.join("..","..","data","txt","the-verdict.txt")
-    data = GPTDataset(text_path, n_ctx=256, stride=256)
+    text_path = os.path.join("..","..","data","txt","1984.txt")
+    data = GPTDataset(text_path, n_ctx=1024, stride=1024)
     train_data = Subset(data, indices=range(0,int(0.9*len(data))))
     val_data = Subset(data, indices=range(int(0.9*len(data)), len(data)))
 
@@ -131,9 +131,9 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_data, batch_size=1, shuffle=False, drop_last=False)
 
     # Pretrain model
-    pretrain(train_config, model, optimizer, loss_fn, train_loader, val_loader, verbose=True)
+    training_logs = pretrain(train_config, model, optimizer, loss_fn, train_loader, val_loader, verbose=True)
 
 
     # Save model
     model.to("cpu")
-    torch.save(model.state_dict(), "gpt2.pth")
+    torch.save(model.state_dict(), "gpt2-baseline.pth")
