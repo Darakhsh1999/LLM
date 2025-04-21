@@ -124,7 +124,7 @@ class GPT(nn.Module):
         )
 
         self.output_head_ln = nn.LayerNorm(config["d_e"])
-        self.output_head = nn.Linear(config["d_e"], config["vocab_size"])
+        self.output_head = nn.Linear(config["d_e"], config["vocab_size"], bias=False)
 
     def forward(self, token_idx:Tensor) -> Tensor:
         B, T = token_idx.shape # B = batch size, T = sequence length 
@@ -203,9 +203,13 @@ if __name__ == "__main__":
     example_input = torch.randint(0, config["vocab_size"], (2,1024))
 
     gpt = GPT(config)
+    print(gpt)
 
     print(gpt(example_input).shape)
 
     input_string = "Hello I am a"
     output = gpt.generate(input_string, decode=True)
     print(output)
+
+    from torchsummary import summary
+    summary(gpt)  # Replace with your input size
