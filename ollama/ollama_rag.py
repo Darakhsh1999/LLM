@@ -1,6 +1,4 @@
-import ollama
 import os.path as osp
-
 from langchain_ollama import ChatOllama
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -16,16 +14,9 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 pdf_path = osp.join("..","data","pdf")
 pdf_data = PyPDFDirectoryLoader(path=pdf_path).load()
 
-#print(pdf_data[0].page_content[:300]) # test print content
-
-
 # Split text and chunk it 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 text_chunks = text_splitter.split_documents(pdf_data)
-
-
-#print(text_chunks[0]) # print chunk
-
 
 # Create vector database from text chunks
 db = Chroma.from_documents(
@@ -33,7 +24,6 @@ db = Chroma.from_documents(
     embedding=OllamaEmbeddings(model="nomic-embed-text"),
     persist_directory="chroma_db"
 )
-
 
 # Retrieval
 llm = ChatOllama(model="llama3.2")
@@ -64,7 +54,6 @@ chain = (
     | llm
     | StrOutputParser()
 )
-
 
 
 # Query

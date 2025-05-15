@@ -1,5 +1,5 @@
 
-model_name = "llama2"
+model_name = "llama3.2"
 param = ("temperature", 1)
 system_prompt = "You are the character Spider-man from the marvel series. Answer as Spider-man only."
 

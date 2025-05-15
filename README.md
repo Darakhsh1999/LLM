@@ -1,8 +1,6 @@
 # LLM
 Anything LLMs and then some more
 
-## Table of Contents
-
 
 ## RAG
 

@@ -51,7 +51,6 @@ if __name__ == "__main__":
     # DB retriever
     retriever = db.as_retriever(search_kwargs={"k": 5})
 
-
     # Query prompt
     prompt_template = """
     You are and LLM assistant to aid the user with Retrieval Augmented Generation (RAG).
@@ -63,7 +62,6 @@ if __name__ == "__main__":
     Here is the question the user has asked: {question}
     """
     prompt = ChatPromptTemplate.from_template(prompt_template)
-
 
     # Main loop
     chain = prompt | model # prompt -> model

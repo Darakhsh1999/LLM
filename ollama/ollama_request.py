@@ -1,23 +1,18 @@
-""" """
-
-import os
 import json
-import utils
 import requests
 
-from dotenv import load_dotenv
-from config import Config
+def parse_message(message:str):
+    return [{"role": "user", "content": message}]
 
-load_dotenv()
-c = Config()
-url = f"{os.getenv("OLLAMA_URL")}/api/chat"
+model_name = "llama3.2"
+url = f"http://127.0.0.1:11434/api/chat"
 
 message = "Can you make a bullet point list of the steps for build a wooden house"
 
 # request JSON
 request = {
-    "model": c.model_name,
-    "messages": utils.parse_message(message)
+    "model": model_name,
+    "messages": parse_message(message)
 }
 
 # Send request

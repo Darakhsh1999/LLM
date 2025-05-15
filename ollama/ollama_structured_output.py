@@ -1,20 +1,17 @@
-import instructor
+from instructor import from_openai, Mode
 from openai import OpenAI
 from pydantic import BaseModel, Field
-from dotenv import load_dotenv
-#load_dotenv()
 
-
+# Desired LLM output
 class DataModel(BaseModel):
     name: str = Field(..., description="The name of the person")
     number_of_kids: int = Field(..., description="How many kids does the parent have?")
 
-client = instructor.from_openai(
+# Create a ollama client 
+client = from_openai(
     OpenAI(base_url="http://localhost:11434/v1", api_key="ollama"),
-    mode=instructor.Mode.JSON
+    mode=Mode.JSON
 )
-
-
 
 respone = client.messages.create(
     model="llama3.1:latest",

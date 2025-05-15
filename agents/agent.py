@@ -1,3 +1,5 @@
+""" AI Agent that can answer user queries by searching the web and Wikipedia. """
+
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -8,25 +10,24 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from tools import search_tool, wiki_tool
 
+
+# Load in API keys from .env
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 api_key2 = os.getenv("CLAUDE_API_KEY")
 
 
+# Pydantic class for structured output
 class ResearchRespone(BaseModel):
     topic: str
     summary: str
     source: list[str]
     tools_used: list[str]
-
-
-
-
-llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
-#llm2 = ChatAnthropic(model_name="claude-3-5-sonnet-20241022", api_key=api_key2)
-
 parser = PydanticOutputParser(pydantic_object=ResearchRespone)
 
+# Define LLM
+llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
+#llm2 = ChatAnthropic(model_name="claude-3-5-sonnet-20241022", api_key=api_key2)
 
 # LLM prompt
 prompt = ChatPromptTemplate.from_messages(
@@ -47,18 +48,18 @@ prompt = ChatPromptTemplate.from_messages(
 
 
 # Agent
-tools = [search_tool, wiki_tool]
 agent = create_tool_calling_agent(
     llm=llm,
     prompt=prompt,
-    tools=tools
+    tools=[search_tool, wiki_tool]
 )
 
-
 # Executor object
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+executor = AgentExecutor(agent=agent, tools=[search_tool, wiki_tool], verbose=True)
 user_query = input("Query:")
 respone = executor.invoke({"query":user_query})
 
-structured_respone = parser.parse(respone["output"])
+llm_respone = respone["output"]
+
+structured_respone = parser.parse(llm_respone)
 print(structured_respone)

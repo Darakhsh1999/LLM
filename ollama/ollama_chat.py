@@ -1,14 +1,11 @@
 import ollama
-from config import Config
 
-c = Config()
-
-# Model prompt
-prompt = "What tools are essential for camping in the wilds where the climate has a lot of trees. Limit respone to 3 sentences"
+model_name = "llama3.2"
 
 # ollama chat function call
+prompt = "What tools are essential for camping in the wilds where the climate has a lot of trees. Limit respone to 3 sentences"
 respone = ollama.chat(
-    model=c.model_name,
+    model=model_name,
     messages=[{"role": "user", "content": prompt}],
 )
 
@@ -18,7 +15,7 @@ print(respone.message.content)
 # ollama chat function call
 prompt = "List the 5 first double digit prime numbers"
 respone = ollama.chat(
-    model=c.model_name,
+    model=model_name,
     messages=[{"role": "user", "content": prompt}],
     stream=True
 )
