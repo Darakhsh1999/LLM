@@ -1,4 +1,3 @@
-
 # Table of Contents
 
 .
@@ -32,3 +31,5 @@
 │   ├── prompt_llm.py - "Module for prompting OpenAI LLM"
 │   ├── streamlit_gui.py "Streamlit GUI"
 │   └── vector_database.py "Module for chromaDB utilities"
+├── templates - "Notebooks containing templates for modular tasks encountered in LLM development"
+│   ├── chat_templates.ipynb - "templates for OpenAI, Anthropic"
