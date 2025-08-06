@@ -1,8 +1,7 @@
 import ollama
 import argparse
 
-
-system_prompt = """You're a helpful assistant. The user will ask you a question and answer it consisely if possible.
+system_prompt = """You're a helpful terminal assistant. The user will ask you a question you will think and answer it consisely if possible.
 Only give detailed answer if the user ask for it. """
 
 parser = argparse.ArgumentParser(description="Ollama input prompt ")
